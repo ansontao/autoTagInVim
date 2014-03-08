@@ -1,0 +1,37 @@
+function! GetCtagsUp()
+        "let g:foundtags = findfile("tags", expand('%:p:h').";")
+        if (!exists("g:foundtags") || g:foundtags == "") 
+                let g:foundtags = findfile("tags", getcwd().";")
+                if g:foundtags != ""
+                        exe "cd ".fnamemodify(g:foundtags, ":h")."/"
+                        exe "set tags=".g:foundtags
+                        "echo g:foundtags
+                endif
+        endif
+endfunction
+
+function! WriteTags()
+        if g:foundtags != ""
+        endif
+endfunction
+
+
+function! ReadWirteFile()
+        if (exists("g:foundtags") && g:foundtags != "") 
+                let tagsFile = readfile(g:foundtags, "") 
+                "echo len(tagsFile)
+                if g:foundtags != ""
+                        let filefull = expand("%:p")
+                        let tagfull = fnamemodify(g:foundtags, ":h")."/"
+                        let g:filenameInTag = substitute(filefull, tagfull, "","")
+                        "echo g:filenameInTag
+                        call filter(tagsFile,        "v:val !~ \"^\\\\w\\\\+\<TAB>".g:filenameInTag.".\\\\+$\"")
+                        "echo len(tagsFile)
+                        call writefile(tagsFile, g:foundtags, "") 
+                        call system("ctags -f tags -a ".g:filenameInTag)
+                endif
+        endif
+endfunction
+
+autocmd BufReadPost *.c,*.h call GetCtagsUp()
+autocmd BufWritePost *.c,*.h call ReadWirteFile()
